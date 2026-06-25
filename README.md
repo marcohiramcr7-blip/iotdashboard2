@@ -29,7 +29,7 @@
 </div>
 
 <script>
-    // REEMPLAZA ESTO CON TUS DATOS DE FIREBASE
+    // Credenciales exactas de tu proyecto
     const firebaseConfig = {
         apiKey: "IzaSyA0PtuzyRFtumwsl7XVZIAMBEuBiT5ijnY",
         databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/"
@@ -41,17 +41,26 @@
 
     let buzzerEstado = false;
 
-    // Escuchar la Temperatura y los LEDs en tiempo real
+    // Escuchar la Temperatura en tiempo real (con protección contra valores nulos)
     db.ref('/sensores/temperatura').on('value', (snapshot) => {
-        document.getElementById('valor-temp').innerText = snapshot.val().toFixed(1);
+        const valor = snapshot.val();
+        if (valor !== null) {
+            document.getElementById('valor-temp').innerText = valor.toFixed(1);
+        } else {
+            document.getElementById('valor-temp').innerText = "--";
+        }
     });
 
+    // Escuchar los LEDs en tiempo real (con protección contra valores nulos)
     db.ref('/estado').on('value', (snapshot) => {
         const estados = snapshot.val();
         let ledTexto = "Ninguno";
-        if (estados.ledAzul) ledTexto = "🔵 Azul (Frío)";
-        if (estados.ledVerde) ledTexto = "🟢 Verde (Normal)";
-        if (estados.ledAmarillo) ledTexto = "🟡 Amarillo (Caliente)";
+        
+        if (estados !== null) {
+            if (estados.ledAzul) ledTexto = "🔵 Azul (Frío)";
+            if (estados.ledVerde) ledTexto = "🟢 Verde (Normal)";
+            if (estados.ledAmarillo) ledTexto = "🟡 Amarillo (Caliente)";
+        }
         
         document.getElementById('led-activo').innerText = ledTexto;
     });
