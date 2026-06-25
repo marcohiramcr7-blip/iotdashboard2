@@ -31,8 +31,8 @@
 <script>
     // REEMPLAZA ESTO CON TUS DATOS DE FIREBASE
     const firebaseConfig = {
-        apiKey: "TU_API_KEY_DE_FIREBASE",
-        databaseURL: "URL_DE_TU_REALTIME_DATABASE"
+        apiKey: "IzaSyA0PtuzyRFtumwsl7XVZIAMBEuBiT5ijnY",
+        databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/.jason"
     };
 
     // Inicializar Firebase
