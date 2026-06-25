@@ -32,7 +32,7 @@
     // REEMPLAZA ESTO CON TUS DATOS DE FIREBASE
     const firebaseConfig = {
         apiKey: "IzaSyA0PtuzyRFtumwsl7XVZIAMBEuBiT5ijnY",
-        databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/.jason"
+        databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/"
     };
 
     // Inicializar Firebase
