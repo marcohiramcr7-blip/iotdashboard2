@@ -3,83 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard IoT</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <title>Dashboard ESP32 - Monitoreo</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        .temp { font-size: 3rem; font-weight: bold; color: #333; }
-        .led-status { margin: 15px 0; font-size: 1.2rem; }
-        .btn-buzzer { padding: 10px 20px; font-size: 1.2rem; border: none; border-radius: 5px; cursor: pointer; color: white; background-color: #e74c3c; }
-        .btn-buzzer.active { background-color: #c0392b; box-shadow: inset 0 3px 5px rgba(0,0,0,0.2); }
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: inline-block; }
+        .valor { font-size: 3em; color: #007bff; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Monitor de Temperatura</h2>
-    <div class="temp"><span id="valor-temp">--</span>°C</div>
+    <h1>Monitoreo en Tiempo Real</h1>
     
-    <div class="led-status">
-        <strong>LED Activo:</strong> <span id="led-activo">Cargando...</span>
+    <div class="card">
+        <h3>Temperatura Actual</h3>
+        <div id="temp" class="valor">-- °C</div>
     </div>
 
-    <button id="btn-buzzer" class="btn-buzzer" onclick="toggleBuzzer()">Activar Buzzer</button>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-<script>
-    // Credenciales exactas de tu proyecto
-    const firebaseConfig = {
-        apiKey: "IzaSyA0PtuzyRFtumwsl7XVZIAMBEuBiT5ijnY",
-        databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/"
-    };
+        // CONFIGURACIÓN (Copia esto de tu consola de Firebase)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0PtuzyRFtumwsl7XVZIAMBEuBiT5ijnY",
+            authDomain: "proyecto-redes-8d766.firebaseapp.com",
+            databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/",
+            projectId: "proyecto-redes-8d766",
+            storageBucket: "proyecto-redes-8d766.appspot.com",
+            messagingSenderId: "TU_ID_MENSAJERO", 
+            appId: "TU_ID_APP"
+        };
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        // Inicializar
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    let buzzerEstado = false;
+        // Referencias a tus rutas de Firebase
+        const tempRef = ref(db, 'sensores/temperatura');
 
-    // Escuchar la Temperatura en tiempo real (con protección contra valores nulos)
-    db.ref('/sensores/temperatura').on('value', (snapshot) => {
-        const valor = snapshot.val();
-        if (valor !== null) {
-            document.getElementById('valor-temp').innerText = valor.toFixed(1);
-        } else {
-            document.getElementById('valor-temp').innerText = "--";
-        }
-    });
-
-    // Escuchar los LEDs en tiempo real (con protección contra valores nulos)
-    db.ref('/estado').on('value', (snapshot) => {
-        const estados = snapshot.val();
-        let ledTexto = "Ninguno";
-        
-        if (estados !== null) {
-            if (estados.ledAzul) ledTexto = "🔵 Azul (Frío)";
-            if (estados.ledVerde) ledTexto = "🟢 Verde (Normal)";
-            if (estados.ledAmarillo) ledTexto = "🟡 Amarillo (Caliente)";
-        }
-        
-        document.getElementById('led-activo').innerText = ledTexto;
-    });
-
-    // Función para el botón del Buzzer
-    function toggleBuzzer() {
-        buzzerEstado = !buzzerEstado;
-        db.ref('/control/buzzerWeb').set(buzzerEstado);
-        
-        const btn = document.getElementById('btn-buzzer');
-        if(buzzerEstado) {
-            btn.innerText = "Desactivar Buzzer";
-            btn.classList.add("active");
-        } else {
-            btn.innerText = "Activar Buzzer";
-            btn.classList.remove("active");
-        }
-    }
-</script>
-
+        // Escuchar datos
+        onValue(tempRef, (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById("temp").innerText = data ? data.toFixed(1) + " °C" : "-- °C";
+        });
+    </script>
 </body>
 </html>
