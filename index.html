@@ -2,50 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard ESP32 - Monitoreo</title>
+    <title>Dashboard IoT ESP32</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: inline-block; }
-        .valor { font-size: 3em; color: #007bff; }
+        .led { width: 50px; height: 50px; border-radius: 50%; display: inline-block; background: gray; }
+        .active-azul { background: blue; }
+        .active-verde { background: green; }
+        .active-amarillo { background: yellow; }
     </style>
 </head>
 <body>
-
-    <h1>Monitoreo en Tiempo Real</h1>
+    <h1>Monitor Ambiental</h1>
+    <p>Temperatura: <span id="temp">--</span> °C</p>
     
-    <div class="card">
-        <h3>Temperatura Actual</h3>
-        <div id="temp" class="valor">-- °C</div>
+    <div>
+        <div id="ledAzul" class="led"></div>
+        <div id="ledVerde" class="led"></div>
+        <div id="ledAmarillo" class="led"></div>
     </div>
 
+    <br>
+    <button onclick="toggleBuzzer()">Activar/Desactivar Buzzer Manual</button>
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        // CONFIGURACIÓN (Copia esto de tu consola de Firebase)
-        const firebaseConfig = {
-            apiKey: "AIzaSyA0PtuzyRFtumwsl7XVZIAMBEuBiT5ijnY",
-            authDomain: "proyecto-redes-8d766.firebaseapp.com",
-            databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/",
-            projectId: "proyecto-redes-8d766",
-            storageBucket: "proyecto-redes-8d766.appspot.com",
-            messagingSenderId: "TU_ID_MENSAJERO", 
-            appId: "TU_ID_APP"
-        };
-
-        // Inicializar
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Referencias a tus rutas de Firebase
-        const tempRef = ref(db, 'sensores/temperatura');
+        const firebaseConfig = { databaseURL: "https://proyecto-redes-8d766-default-rtdb.firebaseio.com/" };
+        const db = getDatabase(initializeApp(firebaseConfig));
 
         // Escuchar datos
-        onValue(tempRef, (snapshot) => {
-            const data = snapshot.val();
-            document.getElementById("temp").innerText = data ? data.toFixed(1) + " °C" : "-- °C";
-        });
+        onValue(ref(db, 'sensores/temperatura'), (s) => document.getElementById('temp').innerText = s.val());
+        
+        onValue(ref(db, 'estado/ledAzul'), (s) => document.getElementById('ledAzul').className = s.val() ? 'led active-azul' : 'led');
+        // ... repite para los otros leds
+        
+        window.toggleBuzzer = () => {
+            const dbRef = ref(db, 'control/buzzerWeb');
+            onValue(dbRef, (s) => {
+                set(dbRef, !s.val());
+            }, {onlyOnce: true});
+        };
     </script>
 </body>
 </html>
